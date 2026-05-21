@@ -6,48 +6,58 @@
     <title>好玩衝裝模擬器</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        body { background-color: #030508; color: #c0c6d0; font-family: 'MingLiU', 'PMingLiU', 'Microsoft JhengHei', sans-serif; image-rendering: pixelated; font-size: 18px; }
+        body { background-color: #030508; color: #c0c6d0; font-family: 'MingLiU', 'PMingLiU', 'Microsoft JhengHei', sans-serif; image-rendering: pixelated; font-size: 16px; }
         .inv-container { background-color: #121319; border: 3px solid #32353d; box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 10px 25px rgba(0,0,0,0.9); }
         .inv-grid { border-top: 2px solid #20222a; border-left: 2px solid #20222a; }
+        
+        /* 基礎格子設定：手機版 */
         .inv-slot { background-color: #000000; border-right: 2px solid #20222a; border-bottom: 2px solid #20222a; aspect-ratio: 1; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; -webkit-tap-highlight-color: transparent; }
-        .inv-slot img { width: 64px; height: 64px; object-fit: contain; image-rendering: pixelated; }
+        .inv-slot img { width: 50px; height: 50px; object-fit: contain; image-rendering: pixelated; }
+        
+        /* 電腦版：縮小尺寸 */
+        @media (min-width: 768px) {
+            .inv-slot img { width: 40px; height: 40px; }
+            #stage-box { width: 100px !important; height: 100px !important; }
+            #stage-box img { width: 64px !important; height: 64px !important; }
+        }
+
         .inv-slot.selected { background-color: #1a2238 !important; box-shadow: inset 0 0 8px #3b82f6; }
         .inv-slot.active-item { border: 2px solid #daa520 !important; background-color: #1a1710; }
-        #system-chat { font-size: 16px; }
+        #system-chat { font-size: 14px; }
     </style>
 </head>
 <body class="min-h-screen py-4 px-3 flex flex-col items-center select-none">
 
-    <div class="w-full max-w-2xl flex flex-col gap-4">
-        <div class="inv-container rounded-lg p-4">
-            <span class="text-sm font-bold text-gray-400 mb-2 block">SCROLLS</span>
+    <div class="w-full max-w-xl flex flex-col gap-4">
+        <div class="inv-container rounded-lg p-3">
+            <span class="text-xs font-bold text-gray-500 mb-1 block">SCROLLS</span>
             <div class="grid grid-cols-4 inv-grid bg-black" id="scrolls-grid"></div>
         </div>
 
         <div class="flex gap-3 items-stretch">
-            <div class="flex-1 bg-[#0b0c10] border-2 border-[#262833] rounded-lg p-6 flex flex-col items-center justify-center relative min-h-[250px]">
-                <div id="protect-badge" class="absolute top-3 right-4 text-base font-bold text-amber-400 hidden">【✨ 保護中】</div>
-                <div id="stage-box" class="w-32 h-32 bg-black border-2 border-[#4c5161] rounded flex items-center justify-center relative cursor-pointer hover:bg-gray-900/50 transition active:scale-95">
-                    <img id="stage-img" src="./w1.png" alt="裝備" class="w-24 h-24 object-contain" onerror="this.style.opacity='0.2';">
+            <div id="stage-box-container" class="flex-1 bg-[#0b0c10] border-2 border-[#262833] rounded-lg p-4 flex flex-col items-center justify-center relative">
+                <div id="protect-badge" class="absolute top-2 right-2 text-xs font-bold text-amber-400 hidden">【✨ 保護中】</div>
+                <div id="stage-box" class="w-24 h-24 bg-black border-2 border-[#4c5161] rounded flex items-center justify-center relative cursor-pointer hover:bg-gray-900/50 transition active:scale-95">
+                    <img id="stage-img" src="./w1.png" alt="裝備" class="w-16 h-16 object-contain" onerror="this.style.opacity='0.2';">
                 </div>
-                <div class="mt-4 text-center">
-                    <h3 id="stage-name" class="text-xl font-bold text-[#e6bc55]">克特之劍</h3>
-                    <p id="stage-status" class="text-sm text-green-500 mt-2">這件物品在安定值內，絕對安全。</p>
+                <div class="mt-2 text-center">
+                    <h3 id="stage-name" class="font-bold text-[#e6bc55] text-sm">克特之劍</h3>
+                    <p id="stage-status" class="text-[11px] text-green-500">安定值內，絕對安全。</p>
                 </div>
             </div>
-            <button onclick="resetGame()" class="w-16 bg-[#2a2c38] hover:bg-[#383b4c] text-gray-200 rounded border border-[#44485c] font-bold active:scale-[0.95] flex items-center justify-center">
+            <button onclick="resetGame()" class="w-16 bg-[#2a2c38] hover:bg-[#383b4c] text-gray-200 rounded border border-[#44485c] font-bold text-sm active:scale-[0.95] flex items-center justify-center">
                 重<br>置
             </button>
         </div>
 
-        <div class="inv-container rounded-lg p-4">
-            <span class="text-sm font-bold text-gray-400 mb-2 block">EQUIPMENT</span>
+        <div class="inv-container rounded-lg p-3">
+            <span class="text-xs font-bold text-gray-500 mb-1 block">EQUIPMENT</span>
             <div class="grid grid-cols-3 inv-grid bg-black" id="equip-grid"></div>
         </div>
 
-        <div class="bg-black border border-[#20222a] p-4 rounded-lg">
-            <div class="text-xs font-bold text-[#4c5a70] mb-2">【系統頻道】</div>
-            <div id="system-chat" class="space-y-1 font-mono h-[120px] overflow-y-auto text-gray-400">
+        <div class="bg-black border border-[#20222a] p-3 rounded-lg">
+            <div class="text-[10px] font-bold text-[#4c5a70] mb-1">【系統頻道】</div>
+            <div id="system-chat" class="space-y-0.5 font-mono h-[80px] overflow-y-auto text-gray-400">
                 <p>• 系統已就緒。</p>
             </div>
         </div>
@@ -80,7 +90,7 @@
             scrollsData.forEach(scr => {
                 const slot = document.createElement('div');
                 slot.className = 'inv-slot p-1 text-center';
-                slot.innerHTML = `<img src="${scr.img}"><span class="text-[11px] text-gray-300 font-bold mt-1">${scr.label}</span>`;
+                slot.innerHTML = `<img src="${scr.img}"><span class="text-[9px] text-gray-300 font-bold mt-0.5">${scr.label}</span>`;
                 if (selectedScroll?.id === scr.id) slot.classList.add('selected');
                 slot.onclick = () => { selectedScroll = scr; renderInventory(); };
                 sGrid.appendChild(slot);
@@ -93,7 +103,7 @@
                 const slot = document.createElement('div');
                 slot.className = 'inv-slot p-1 text-center' + (id === activeItemId ? ' active-item' : '');
                 slot.id = `slot-${item.id}`;
-                slot.innerHTML = `<img src="${item.img}"><span class="text-[11px] text-amber-600 font-bold mt-1">安:${item.safe}</span>`;
+                slot.innerHTML = `<img src="${item.img}"><span class="text-[9px] text-amber-600 font-bold mt-0.5">安:${item.safe}</span>`;
                 slot.onclick = () => { activeItemId = id; renderInventory(); updateStage(); };
                 eGrid.appendChild(slot);
             });
@@ -105,7 +115,7 @@
                 const slot = document.getElementById(`slot-${id}`);
                 if (!slot) return;
                 const badge = document.createElement('span');
-                badge.className = 'absolute top-1 right-1 text-xs font-bold text-green-400';
+                badge.className = 'absolute top-0.5 right-0.5 text-[9px] font-bold text-green-400';
                 if (itemsState[id].isBroken) badge.innerText = '❌';
                 else if (itemsState[id].level > 0) badge.innerText = `+${itemsState[id].level}`;
                 slot.appendChild(badge);
