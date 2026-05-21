@@ -7,20 +7,23 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body { background-color: #030508; color: #c0c6d0; font-family: 'MingLiU', 'PMingLiU', 'Microsoft JhengHei', sans-serif; image-rendering: pixelated; font-size: 16px; }
-        .inv-container { background-color: #121319; border: 3px solid #32353d; box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 10px 25px rgba(0,0,0,0.9); }
-        .inv-grid { border-top: 2px solid #20222a; border-left: 2px solid #20222a; }
+        .inv-container { background-color: #121319; border: 2px solid #32353d; padding: 10px; }
+        .inv-grid { display: grid; gap: 2px; }
         
-        /* 基礎格子設定：手機版 */
-        .inv-slot { background-color: #000000; border-right: 2px solid #20222a; border-bottom: 2px solid #20222a; aspect-ratio: 1; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; -webkit-tap-highlight-color: transparent; }
-        .inv-slot img { width: 50px; height: 50px; object-fit: contain; image-rendering: pixelated; }
-        
-        /* 電腦版：縮小尺寸 */
+        /* 手機版：格狀 */
+        #scrolls-grid { grid-template-columns: repeat(4, 1fr); }
+        #equip-grid { grid-template-columns: repeat(3, 1fr); }
+
+        /* 電腦版：卷軸單行 */
         @media (min-width: 768px) {
-            .inv-slot img { width: 40px; height: 40px; }
-            #stage-box { width: 100px !important; height: 100px !important; }
-            #stage-box img { width: 64px !important; height: 64px !important; }
+            #scrolls-grid { grid-template-columns: repeat(7, 1fr); }
+            .w-full.max-w-2xl { max-width: 500px; }
         }
 
+        .inv-slot { background-color: #000000; aspect-ratio: 1; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border: 1px solid #20222a; }
+        .inv-slot img { width: 80%; height: 60%; object-fit: contain; image-rendering: pixelated; }
+        .inv-slot span { font-size: 0.7em; margin-top: 2px; }
+        
         .inv-slot.selected { background-color: #1a2238 !important; box-shadow: inset 0 0 8px #3b82f6; }
         .inv-slot.active-item { border: 2px solid #daa520 !important; background-color: #1a1710; }
         #system-chat { font-size: 14px; }
@@ -28,38 +31,33 @@
 </head>
 <body class="min-h-screen py-4 px-3 flex flex-col items-center select-none">
 
-    <div class="w-full max-w-xl flex flex-col gap-4">
-        <div class="inv-container rounded-lg p-3">
-            <span class="text-xs font-bold text-gray-500 mb-1 block">SCROLLS</span>
-            <div class="grid grid-cols-4 inv-grid bg-black" id="scrolls-grid"></div>
+    <div class="w-full max-w-2xl flex flex-col gap-3">
+        <div class="inv-container rounded-lg">
+            <span class="text-[12px] font-bold text-gray-500 mb-2 block">SCROLLS</span>
+            <div class="inv-grid" id="scrolls-grid"></div>
         </div>
 
-        <div class="flex gap-3 items-stretch">
-            <div id="stage-box-container" class="flex-1 bg-[#0b0c10] border-2 border-[#262833] rounded-lg p-4 flex flex-col items-center justify-center relative">
-                <div id="protect-badge" class="absolute top-2 right-2 text-xs font-bold text-amber-400 hidden">【✨ 保護中】</div>
-                <div id="stage-box" class="w-24 h-24 bg-black border-2 border-[#4c5161] rounded flex items-center justify-center relative cursor-pointer hover:bg-gray-900/50 transition active:scale-95">
-                    <img id="stage-img" src="./w1.png" alt="裝備" class="w-16 h-16 object-contain" onerror="this.style.opacity='0.2';">
+        <div class="flex gap-2 items-stretch">
+            <div class="flex-1 bg-[#0b0c10] border border-[#262833] rounded-lg p-4 flex flex-col items-center justify-center relative">
+                <div id="protect-badge" class="absolute top-2 right-2 text-[10px] font-bold text-amber-400 hidden">【保護中】</div>
+                <div id="stage-box" class="w-20 h-20 bg-black border border-[#4c5161] rounded flex items-center justify-center cursor-pointer hover:bg-gray-900/50 transition active:scale-95">
+                    <img id="stage-img" src="./w1.png" class="w-14 h-14 object-contain">
                 </div>
                 <div class="mt-2 text-center">
                     <h3 id="stage-name" class="font-bold text-[#e6bc55] text-sm">克特之劍</h3>
-                    <p id="stage-status" class="text-[11px] text-green-500">安定值內，絕對安全。</p>
+                    <p id="stage-status" class="text-[10px] text-green-500">安定值內，絕對安全。</p>
                 </div>
             </div>
-            <button onclick="resetGame()" class="w-16 bg-[#2a2c38] hover:bg-[#383b4c] text-gray-200 rounded border border-[#44485c] font-bold text-sm active:scale-[0.95] flex items-center justify-center">
-                重<br>置
-            </button>
+            <button onclick="resetGame()" class="w-12 bg-[#2a2c38] hover:bg-[#383b4c] text-gray-200 rounded border border-[#44485c] font-bold text-xs active:scale-[0.95]">重<br>置</button>
         </div>
 
-        <div class="inv-container rounded-lg p-3">
-            <span class="text-xs font-bold text-gray-500 mb-1 block">EQUIPMENT</span>
-            <div class="grid grid-cols-3 inv-grid bg-black" id="equip-grid"></div>
+        <div class="inv-container rounded-lg">
+            <span class="text-[12px] font-bold text-gray-500 mb-2 block">EQUIPMENT</span>
+            <div class="inv-grid" id="equip-grid"></div>
         </div>
 
-        <div class="bg-black border border-[#20222a] p-3 rounded-lg">
-            <div class="text-[10px] font-bold text-[#4c5a70] mb-1">【系統頻道】</div>
-            <div id="system-chat" class="space-y-0.5 font-mono h-[80px] overflow-y-auto text-gray-400">
-                <p>• 系統已就緒。</p>
-            </div>
+        <div class="bg-black border border-[#20222a] p-3 rounded-lg text-[12px] h-[80px] overflow-y-auto" id="system-chat">
+            <p class="text-gray-500">• 系統已就緒。</p>
         </div>
     </div>
 
@@ -69,11 +67,9 @@
             'a1': { id: 'a1', name: '風龍盔甲', type: 'armor', level: 0, safe: 4, isBroken: false, isProtected: false, img: './a1.png' },
             'a2': { id: 'a2', name: '風龍鞋', type: 'armor', level: 0, safe: 6, isBroken: false, isProtected: false, img: './a2.png' }
         };
-
         let itemsState = JSON.parse(JSON.stringify(initialData));
         let activeItemId = 'w1';
         let selectedScroll = null;
-
         const scrollsData = [
             { id: 'w_white', scrollType: 'weapon', bcast: 'white', label: '白武', img: './w_white.png' },
             { id: 'a_white', scrollType: 'armor',  bcast: 'white', label: '白防', img: './a_white.png' },
@@ -85,95 +81,65 @@
         ];
 
         function renderInventory() {
-            const sGrid = document.getElementById('scrolls-grid');
-            sGrid.innerHTML = '';
-            scrollsData.forEach(scr => {
-                const slot = document.createElement('div');
-                slot.className = 'inv-slot p-1 text-center';
-                slot.innerHTML = `<img src="${scr.img}"><span class="text-[9px] text-gray-300 font-bold mt-0.5">${scr.label}</span>`;
-                if (selectedScroll?.id === scr.id) slot.classList.add('selected');
-                slot.onclick = () => { selectedScroll = scr; renderInventory(); };
-                sGrid.appendChild(slot);
+            const sGrid = document.getElementById('scrolls-grid'); sGrid.innerHTML = '';
+            scrollsData.forEach(s => {
+                const div = document.createElement('div');
+                div.className = `inv-slot ${selectedScroll?.id === s.id ? 'selected' : ''}`;
+                div.innerHTML = `<img src="${s.img}"><span>${s.label}</span>`;
+                div.onclick = () => { selectedScroll = s; renderInventory(); };
+                sGrid.appendChild(div);
             });
-
-            const eGrid = document.getElementById('equip-grid');
-            eGrid.innerHTML = '';
+            const eGrid = document.getElementById('equip-grid'); eGrid.innerHTML = '';
             Object.keys(itemsState).forEach(id => {
                 const item = itemsState[id];
-                const slot = document.createElement('div');
-                slot.className = 'inv-slot p-1 text-center' + (id === activeItemId ? ' active-item' : '');
-                slot.id = `slot-${item.id}`;
-                slot.innerHTML = `<img src="${item.img}"><span class="text-[9px] text-amber-600 font-bold mt-0.5">安:${item.safe}</span>`;
-                slot.onclick = () => { activeItemId = id; renderInventory(); updateStage(); };
-                eGrid.appendChild(slot);
+                const div = document.createElement('div');
+                div.className = `inv-slot ${id === activeItemId ? 'active-item' : ''}`;
+                div.id = 'slot-'+id;
+                div.innerHTML = `<img src="${item.img}"><span>安:${item.safe}</span>`;
+                div.onclick = () => { activeItemId = id; renderInventory(); updateStage(); };
+                eGrid.appendChild(div);
             });
             refreshBadges();
         }
 
         function refreshBadges() {
             Object.keys(itemsState).forEach(id => {
-                const slot = document.getElementById(`slot-${id}`);
+                const slot = document.getElementById('slot-'+id);
                 if (!slot) return;
                 const badge = document.createElement('span');
-                badge.className = 'absolute top-0.5 right-0.5 text-[9px] font-bold text-green-400';
+                badge.className = 'absolute top-0.5 right-1 text-[10px] font-bold text-green-400';
                 if (itemsState[id].isBroken) badge.innerText = '❌';
-                else if (itemsState[id].level > 0) badge.innerText = `+${itemsState[id].level}`;
+                else if (itemsState[id].level > 0) badge.innerText = '+'+itemsState[id].level;
                 slot.appendChild(badge);
             });
         }
 
         function executeLogic() {
             const scr = selectedScroll;
-            const current = itemsState[activeItemId];
-            if (current.isBroken) { addChatLog("裝備已損壞", "#ff5555"); return; }
-            if (!scr) { addChatLog("請選卷軸", "#ff5555"); return; }
-            if (scr.scrollType !== 'support' && scr.scrollType !== current.type) { addChatLog("種類不符", "#ff5555"); return; }
-
-            if (scr.bcast === 'protect') { current.isProtected = true; addChatLog("保護狀態開啟", "#fbbf24"); }
-            else if (scr.bcast === 'curse') { if(current.level > 0) current.level--; addChatLog("詛咒退階", "#f87171"); }
+            const cur = itemsState[activeItemId];
+            if (cur.isBroken || !scr || (scr.scrollType !== 'support' && scr.scrollType !== cur.type)) return;
+            if (scr.bcast === 'protect') { cur.isProtected = true; addChat("保護開啟"); }
+            else if (scr.bcast === 'curse') { if(cur.level > 0) cur.level--; addChat("詛咒"); }
             else {
-                let chance = (current.level >= current.safe) ? (current.level - current.safe === 0 ? 33 : (current.level - current.safe === 1 ? 25 : 20)) : 100;
-                if (Math.random() * 100 < chance) {
-                    let plus = 1;
-                    if (scr.bcast === 'bless') {
-                        if (current.type === 'weapon') plus = (current.level < 6) ? (Math.random() < 0.5 ? 2 : 1) : 1;
-                        else plus = (current.level < 3) ? (Math.random() < 0.33 ? 3 : (Math.random() < 0.66 ? 2 : 1)) : (Math.random() < 0.5 ? 2 : 1);
-                    }
-                    current.level += plus;
-                    addChatLog(`強化成功 +${plus}`, "#60a5fa");
-                } else if (current.isProtected) {
-                    current.isProtected = false;
-                    if (Math.random() < 0.75 && current.level > 0) current.level--;
-                    addChatLog("保護失效，未碎裂", "#fbbf24");
-                } else {
-                    current.isBroken = true;
-                    addChatLog("裝備消失", "#f87171");
-                }
+                let chance = (cur.level >= cur.safe) ? (cur.level - cur.safe === 0 ? 33 : (cur.level - cur.safe === 1 ? 25 : 20)) : 100;
+                if (Math.random()*100 < chance) {
+                    let plus = (scr.bcast === 'bless') ? (cur.type === 'weapon' ? (cur.level < 6 ? (Math.random()<0.5?2:1) : 1) : (cur.level < 3 ? (Math.random()<0.33?3:(Math.random()<0.66?2:1)) : (Math.random()<0.5?2:1))) : 1;
+                    cur.level += plus; addChat("成功 +"+plus);
+                } else if (cur.isProtected) { cur.isProtected = false; addChat("保護失效"); }
+                else { cur.isBroken = true; addChat("裝備消失"); }
             }
-            updateStage(); renderInventory();
+            renderInventory(); updateStage();
         }
 
+        function addChat(t) { const c = document.getElementById('system-chat'); c.innerHTML += `<p>• ${t}</p>`; c.scrollTop = c.scrollHeight; }
         function updateStage() {
-            const current = itemsState[activeItemId];
-            document.getElementById('stage-img').src = current.img;
-            document.getElementById('stage-name').innerText = current.isBroken ? "已消失" : (current.level > 0 ? `+${current.level} ` : "") + current.name;
-            document.getElementById('protect-badge').classList.toggle('hidden', !current.isProtected);
-            document.getElementById('stage-status').innerText = current.isBroken ? "已被摧毀。" : (current.level < current.safe ? "安定值內，絕對安全。" : "⚠️ 已過安定值！");
+            const cur = itemsState[activeItemId];
+            document.getElementById('stage-img').src = cur.img;
+            document.getElementById('stage-name').innerText = cur.isBroken ? "已消失" : "+"+cur.level+" "+cur.name;
+            document.getElementById('protect-badge').classList.toggle('hidden', !cur.isProtected);
+            document.getElementById('stage-status').innerText = cur.isBroken ? "已被摧毀。" : (cur.level < cur.safe ? "安定值內，絕對安全。" : "⚠️ 已過安定值！");
         }
-
-        function addChatLog(text, color) {
-            const chat = document.getElementById('system-chat');
-            chat.innerHTML += `<p style="color:${color}">• ${text}</p>`;
-            chat.scrollTop = chat.scrollHeight;
-        }
-
-        function resetGame() { 
-            itemsState = JSON.parse(JSON.stringify(initialData));
-            addChatLog("系統已重置裝備", "#ffffff");
-            renderInventory(); 
-            updateStage(); 
-        }
-        
+        function resetGame() { itemsState = JSON.parse(JSON.stringify(initialData)); renderInventory(); updateStage(); addChat("重置完成"); }
         document.getElementById('stage-box').onclick = executeLogic;
         renderInventory(); updateStage();
     </script>
