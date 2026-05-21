@@ -10,11 +10,9 @@
         .inv-container { background-color: #121319; border: 2px solid #32353d; padding: 10px; }
         .inv-grid { display: grid; gap: 2px; }
         
-        /* 手機版：格狀 */
         #scrolls-grid { grid-template-columns: repeat(4, 1fr); }
         #equip-grid { grid-template-columns: repeat(3, 1fr); }
 
-        /* 電腦版：卷軸單行 */
         @media (min-width: 768px) {
             #scrolls-grid { grid-template-columns: repeat(7, 1fr); }
             .w-full.max-w-2xl { max-width: 500px; }
@@ -118,15 +116,21 @@
             const scr = selectedScroll;
             const cur = itemsState[activeItemId];
             if (cur.isBroken || !scr || (scr.scrollType !== 'support' && scr.scrollType !== cur.type)) return;
+            
             if (scr.bcast === 'protect') { cur.isProtected = true; addChat("保護開啟"); }
-            else if (scr.bcast === 'curse') { if(cur.level > 0) cur.level--; addChat("詛咒"); }
+            else if (scr.bcast === 'curse') { if(cur.level > 0) cur.level--; addChat("詛咒 -1"); }
             else {
                 let chance = (cur.level >= cur.safe) ? (cur.level - cur.safe === 0 ? 33 : (cur.level - cur.safe === 1 ? 25 : 20)) : 100;
-                if (Math.random()*100 < chance) {
+                if (Math.random() * 100 < chance) {
                     let plus = (scr.bcast === 'bless') ? (cur.type === 'weapon' ? (cur.level < 6 ? (Math.random()<0.5?2:1) : 1) : (cur.level < 3 ? (Math.random()<0.33?3:(Math.random()<0.66?2:1)) : (Math.random()<0.5?2:1))) : 1;
                     cur.level += plus; addChat("成功 +"+plus);
-                } else if (cur.isProtected) { cur.isProtected = false; addChat("保護失效"); }
-                else { cur.isBroken = true; addChat("裝備消失"); }
+                } else if (cur.isProtected) {
+                    cur.isProtected = false;
+                    if (Math.random() < 0.75 && cur.level > 0) cur.level--;
+                    addChat("保護失效，裝備未消失");
+                } else {
+                    cur.isBroken = true; addChat("裝備消失");
+                }
             }
             renderInventory(); updateStage();
         }
