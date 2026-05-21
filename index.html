@@ -11,7 +11,7 @@
             color: #c0c6d0;
             font-family: 'MingLiU', 'PMingLiU', 'Microsoft JhengHei', sans-serif;
             image-rendering: pixelated;
-            font-size: 18px; /* 字體稍放大 */
+            font-size: 18px;
         }
         .inv-container {
             background-color: #121319;
@@ -31,13 +31,14 @@
             cursor: pointer;
             transition: background 0.1s;
             display: flex;
+            flex-direction: column; /* 讓字在圖下 */
             align-items: center;
             justify-content: center;
             -webkit-tap-highlight-color: transparent;
         }
         .inv-slot img {
-            width: 56px; /* 圖片放大 */
-            height: 56px;
+            width: 64px; /* 圖片進一步放大 */
+            height: 64px;
             object-fit: contain;
             image-rendering: pixelated;
         }
@@ -49,7 +50,7 @@
             border: 2px solid #daa520 !important;
             background-color: #1a1710;
         }
-        #system-chat { font-size: 16px; } /* 頻道字體放大 */
+        #system-chat { font-size: 16px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start lg:justify-center py-4 px-3 select-none">
@@ -60,7 +61,7 @@
                 <div id="protect-badge" class="absolute top-3 right-4 text-base font-bold text-amber-400 hidden">【✨ 保護中】</div>
                 <div class="text-sm text-gray-500 absolute top-3 left-4">【精煉裝備舞台】</div>
                 
-                <div id="stage-box" class="w-28 h-28 bg-black border-2 border-[#4c5161] rounded flex items-center justify-center relative cursor-pointer hover:bg-gray-900/50 transition active:scale-95">
+                <div id="stage-box" class="w-32 h-32 bg-black border-2 border-[#4c5161] rounded flex items-center justify-center relative cursor-pointer hover:bg-gray-900/50 transition active:scale-95">
                     <img id="stage-img" src="./w1.png" alt="裝備" class="w-24 h-24 object-contain" onerror="this.style.opacity='0.2';">
                 </div>
                 <div class="mt-4 text-center">
@@ -84,7 +85,7 @@
 
         <div class="w-full lg:w-[360px] inv-container rounded-lg p-4 flex flex-col gap-4">
             <span class="text-sm font-bold text-gray-400">INVENTORY</span>
-            <div class="grid grid-cols-4 sm:grid-cols-7 inv-grid bg-black" id="scrolls-grid"></div>
+            <div class="grid grid-cols-4 inv-grid bg-black" id="scrolls-grid"></div>
             <div class="grid grid-cols-3 inv-grid bg-black" id="equip-grid"></div>
         </div>
     </div>
@@ -127,8 +128,8 @@
             sGrid.innerHTML = '';
             scrollsData.forEach(scr => {
                 const slot = document.createElement('div');
-                slot.className = 'inv-slot flex flex-col p-1 text-center';
-                slot.innerHTML = `<img src="${scr.img}"><span class="text-[12px] text-gray-300 font-bold mt-1">${scr.label}</span>`;
+                slot.className = 'inv-slot p-1 text-center';
+                slot.innerHTML = `<img src="${scr.img}"><span class="text-[11px] text-gray-300 font-bold mt-1">${scr.label}</span>`;
                 if (selectedScroll?.id === scr.id) slot.classList.add('selected');
                 slot.onclick = () => { selectedScroll = scr; renderInventory(); };
                 sGrid.appendChild(slot);
@@ -139,9 +140,9 @@
             Object.keys(itemsState).forEach(id => {
                 const item = itemsState[id];
                 const slot = document.createElement('div');
-                slot.className = 'inv-slot flex flex-col p-1 text-center' + (id === activeItemId ? ' active-item' : '');
+                slot.className = 'inv-slot p-1 text-center' + (id === activeItemId ? ' active-item' : '');
                 slot.id = `slot-${item.id}`;
-                slot.innerHTML = `<img src="${item.img}"><span class="text-[12px] text-amber-600 font-bold mt-1">安:${item.safe}</span>`;
+                slot.innerHTML = `<img src="${item.img}"><span class="text-[11px] text-amber-600 font-bold mt-1">安:${item.safe}</span>`;
                 slot.onclick = () => { activeItemId = id; renderInventory(); updateStage(); };
                 eGrid.appendChild(slot);
             });
