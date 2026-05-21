@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lineage - 天堂衝裝模擬器 </title>
+    <title>Lineage - 天堂衝裝模擬器 (GitHub 圖片校正版)</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body {
@@ -18,11 +18,12 @@
             border: 3px solid #32353d;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 10px 25px rgba(0,0,0,0.9);
         }
-        /* 道具欄格子 */
+        /* 道具欄網格線 */
         .inv-grid {
             border-top: 2px solid #20222a;
             border-left: 2px solid #20222a;
         }
+        /* 道具欄格子 */
         .inv-slot {
             background-color: #000000;
             border-right: 2px solid #20222a;
@@ -41,15 +42,24 @@
                 background-color: #141722;
             }
         }
+        /* 背包內圖片大小控制 */
+        .inv-slot img {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+        /* 點選卷軸時的高亮藍框 */
         .inv-slot.selected {
             background-color: #1a2238 !important;
             box-shadow: inset 0 0 8px #3b82f6;
         }
+        /* 目前選中的裝備高亮金框 */
         .inv-slot.active-item {
             border: 2px solid #daa520 !important;
             background-color: #1a1710;
         }
-        /* 衝裝施法動畫 */
+        /* 衝裝施法閃爍動畫 */
         .scroll-flash {
             animation: flash 0.2s ease-in-out 2;
         }
@@ -57,7 +67,7 @@
             0%, 100% { filter: brightness(1); }
             50% { filter: brightness(1.8) drop-shadow(0 0 8px #daa520); }
         }
-        /* 自訂系統頻道滾動條 */
+        /* 調整系統滾動條外觀 */
         #system-chat::-webkit-scrollbar {
             width: 6px;
         }
@@ -69,76 +79,61 @@
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start lg:justify-center py-4 px-3 select-none">
 
-    <!-- 遊戲主容器：手機上一律單欄往下排，電腦上則採左右併排 -->
     <div class="w-full max-w-4xl flex flex-col lg:flex-row gap-5 items-stretch">
         
-        <!-- 左側/上方：主舞台與對話框 -->
         <div class="flex-1 w-full flex flex-col justify-between space-y-3">
-            <!-- 點裝大舞台 -->
             <div class="bg-[#0b0c10] border-2 border-[#262833] rounded-lg p-5 flex flex-col items-center justify-center relative min-h-[200px] md:min-h-[230px]">
-                <!-- 保護狀態提示燈 -->
                 <div id="protect-badge" class="absolute top-2 right-3 text-xs md:text-sm font-bold text-amber-400 hidden">【✨ 保護中】</div>
                 <div class="text-[11px] text-gray-500 absolute top-2 left-2">【精煉裝備舞台】</div>
                 
-                <!-- 點擊大格子進行衝裝 -->
                 <div id="stage-box" class="w-20 h-20 md:w-24 md:h-24 bg-black border-2 border-[#4c5161] rounded flex items-center justify-center relative cursor-pointer hover:bg-gray-900/50 transition active:scale-95">
-                    <span id="stage-icon" class="text-4xl md:text-5xl">⚔️</span>
+                    <img id="stage-img" src="./w1.png" alt="裝備" class="w-14 h-14 object-contain" onerror="this.style.opacity='0.2';">
                     <span id="stage-prefix" class="absolute top-1 left-1 text-sm font-bold text-green-400"></span>
                 </div>
                 <div class="mt-3 text-center">
-                    <h3 id="stage-name" class="text-base md:text-lg font-bold text-[#e6bc55] tracking-wide">克特之劍</h3>
+                    <h3 id="stage-name" class="text-base md:text-lg font-bold text-[#e6bc55] tracking-wide">瑟魯基之劍</h3>
                     <p id="stage-status" class="text-xs md:text-sm text-green-500 mt-1">這件物品在安定值內，絕對安全。</p>
                 </div>
-                <!-- 飄字浮動提示 -->
                 <div id="result-toast" class="absolute inset-0 flex items-center justify-center bg-black/80 rounded-lg opacity-0 pointer-events-none transition-opacity duration-150">
                     <span id="toast-text" class="text-sm md:text-base font-bold tracking-wider text-center px-4"></span>
                 </div>
             </div>
 
-            <!-- 操作輔助說明與重置按鈕 -->
             <div class="bg-[#0b0c10] border border-[#262833] p-3 rounded-lg flex justify-between items-center text-xs gap-3">
-                <span class="text-gray-400 leading-relaxed">💡 手機操作：先點右側「裝備」切換舞台，再選「卷軸」並點擊左側「大裝備框」衝裝！</span>
+                <span class="text-gray-400 leading-relaxed">💡 操作提醒：先點右側「裝備」切換目標，再選「卷軸」並點擊左側「大裝備框」衝裝！</span>
                 <button onclick="resetGame()" class="bg-[#2a2c38] hover:bg-[#383b4c] text-gray-200 px-3 py-2 rounded border border-[#44485c] transition shrink-0 font-bold active:scale-95">
                     重置
                 </button>
             </div>
 
-            <!-- 系統頻道 -->
             <div class="bg-black border border-[#20222a] p-3 rounded-lg">
                 <div class="text-[11px] font-bold text-[#4c5a70] mb-1">【系統頻道】</div>
                 <div id="system-chat" class="text-xs space-y-1 font-mono h-[100px] md:h-[120px] overflow-y-auto text-gray-400">
-                    <p class="text-gray-500">• 歡迎使用天堂衝裝模擬器手機優化版！上方為 7 種卷軸，下方為精選武器與防具。</p>
+                    <p class="text-gray-500">• 模擬器已就緒。網頁已全面改為直接讀取您 GitHub 資料夾內部的圖片檔。</p>
                 </div>
             </div>
         </div>
 
-        <!-- 右側/下方：全新精簡RWD道具背包（卷軸在上，裝備在下） -->
         <div class="w-full lg:w-[360px] inv-container rounded-lg p-3 flex flex-col justify-between shrink-0 gap-3">
             <div>
-                <!-- 背包頂部裝飾 -->
                 <div class="flex justify-between items-center mb-2 px-1">
                     <span class="text-xs font-bold text-gray-400 tracking-wider">INVENTORY (道具欄)</span>
                     <button class="w-4 h-4 bg-[#23252e] border border-[#3d4152] text-[10px] text-gray-400 flex items-center justify-center font-bold">×</button>
                 </div>
 
-                <!-- 頂部：7 種卷軸區 -->
                 <div class="mb-3">
-                    <div class="text-[11px] font-bold text-[#556276] mb-1">【魔法卷軸類】</div>
+                    <div class="text-[11px] font-bold text-[#556276] mb-1">【魔法卷軸類 - 上排 7 種】</div>
                     <div class="grid grid-cols-4 sm:grid-cols-7 inv-grid bg-black" id="scrolls-grid">
-                        <!-- JS 動態生成 7 種卷軸 -->
-                    </div>
+                        </div>
                 </div>
 
-                <!-- 底部：裝備區（1把武器、2個防具） -->
                 <div>
-                    <div class="text-[11px] font-bold text-[#556276] mb-1">【精煉裝備類】</div>
+                    <div class="text-[11px] font-bold text-[#556276] mb-1">【精煉裝備類 - 下排 3 種】</div>
                     <div class="grid grid-cols-3 inv-grid bg-black" id="equip-grid">
-                        <!-- JS 動態生成 3 種裝備 -->
-                    </div>
+                        </div>
                 </div>
             </div>
 
-            <!-- 背包底部：負重顯示 -->
             <div class="flex justify-between items-center pt-2 border-t border-[#20222a] px-1 text-xs text-[#a4aab5]">
                 <div>負重: 82 / 180</div>
                 <div class="w-3 h-4 bg-gradient-to-b from-blue-500 to-blue-800 border border-blue-400 rounded shadow-sm shadow-blue-500/50"></div>
@@ -147,7 +142,6 @@
 
     </div>
 
-    <!-- 經典音效 -->
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(type) {
@@ -180,57 +174,56 @@
         }
     </script>
 
-    <!-- 遊戲主邏輯 -->
     <script>
-        // 1. 初始化裝備數據（依據需求：一個武器、防具安定4、防具安定6）
+        // 裝備核心資料結構與圖片綁定
         let itemsState = {
-            'w1': { id: 'w1', name: '瑟魯基之劍', type: 'weapon', level: 0, safe: 6, isBroken: false, isProtected: false, icon: '⚔️' },
-            'a1': { id: 'a1', name: '精靈金屬盔甲', type: 'armor', level: 0, safe: 4, isBroken: false, isProtected: false, icon: '🛡️' },
-            'a2': { id: 'a2', name: '矮人肩膀防具', type: 'armor', level: 0, safe: 6, isBroken: false, isProtected: false, icon: '肩' }
+            'w1': { id: 'w1', name: '瑟魯基之劍', type: 'weapon', level: 0, safe: 6, isBroken: false, isProtected: false, img: './w1.png' },
+            'a1': { id: 'a1', name: '精靈金屬盔甲', type: 'armor', level: 0, safe: 4, isBroken: false, isProtected: false, img: './a1.png' },
+            'a2': { id: 'a2', name: '矮人肩膀防具', type: 'armor', level: 0, safe: 6, isBroken: false, isProtected: false, img: './a2.png' }
         };
 
         let activeItemId = 'w1';
         let selectedScroll = null;
 
-        // 2. 完美的 7 種卷軸資料群組（補齊詛咒防捲）
+        // 7 種卷軸的核心資料與對應圖片綁定
         const scrollsData = [
-            { id: 'w_white', name: '對武器施法的卷軸', scrollType: 'weapon', bcast: 'white', label: '白武' },
-            { id: 'a_white', name: '對盔甲施法的卷軸', scrollType: 'armor',  bcast: 'white', label: '白防' },
-            { id: 'w_bless', name: '(祝福) 對武器施法的卷軸', scrollType: 'weapon', bcast: 'bless', label: '祝武' },
-            { id: 'a_bless', name: '(祝福) 對盔甲施法的卷軸', scrollType: 'armor',  bcast: 'bless', label: '祝防' },
-            { id: 'w_curse', name: '(詛咒) 對武器施法的卷軸', scrollType: 'weapon', bcast: 'curse', label: '詛武' },
-            { id: 'a_curse', name: '(詛咒) 對盔甲施法的卷軸', scrollType: 'armor',  bcast: 'curse', label: '詛防' },
-            { id: 'w_protect', name: '保護卷軸', scrollType: 'support', bcast: 'protect', label: '保護' }
+            { id: 'w_white', name: '對武器施法的卷軸', scrollType: 'weapon', bcast: 'white', label: '白武', img: './w_white.png' },
+            { id: 'a_white', name: '對盔甲施法的卷軸', scrollType: 'armor',  bcast: 'white', label: '白防', img: './a_white.png' },
+            { id: 'w_bless', name: '(祝福) 對武器施法的卷軸', scrollType: 'weapon', bcast: 'bless', label: '祝武', img: './w_bless.png' },
+            { id: 'a_bless', name: '(祝福) 對盔甲施法的卷軸', scrollType: 'armor',  bcast: 'bless', label: '祝防', img: './a_bless.png' },
+            { id: 'w_curse', name: '(詛咒) 對武器施法的卷軸', scrollType: 'weapon', bcast: 'curse', label: '詛武', img: './w_curse.png' },
+            { id: 'a_curse', name: '(詛咒) 對盔甲施法的卷軸', scrollType: 'armor',  bcast: 'curse', label: '詛防', img: './a_curse.png' },
+            { id: 'w_protect', name: '保護卷軸', scrollType: 'support', bcast: 'protect', label: '保護', img: './w_protect.png' }
         ];
 
-        // 3. 生成背包介面
+        // 渲染背包格子
         function renderInventory() {
-            // 生成卷軸網格
+            // 填入 7 種卷軸
             const sGrid = document.getElementById('scrolls-grid');
             sGrid.innerHTML = '';
             scrollsData.forEach(scr => {
                 const slot = document.createElement('div');
-                slot.className = 'inv-slot flex flex-col p-1 text-center';
+                slot.className = 'inv-slot flex flex-col p-0.5 text-center';
                 slot.setAttribute('data-id', scr.id);
                 slot.innerHTML = `
-                    <span class="text-lg md:text-xl mb-0.5">📜</span>
-                    <span class="text-[10px] text-gray-400 font-bold">${scr.label}</span>
+                    <img src="${scr.img}" alt="${scr.label}" title="${scr.name}" onerror="this.style.opacity='0.2';">
+                    <span class="text-[9px] text-gray-400 font-bold scale-90">${scr.label}</span>
                 `;
                 slot.onclick = () => selectScroll(scr, slot);
                 sGrid.appendChild(slot);
             });
 
-            // 生成裝備網格
+            // 填入 3 種裝備
             const eGrid = document.getElementById('equip-grid');
             eGrid.innerHTML = '';
             Object.keys(itemsState).forEach(id => {
                 const item = itemsState[id];
                 const slot = document.createElement('div');
-                slot.className = 'inv-slot flex flex-col p-1 text-center';
+                slot.className = 'inv-slot flex flex-col p-0.5 text-center';
                 slot.id = `slot-${item.id}`;
                 slot.innerHTML = `
-                    <span class="text-xl md:text-2xl">${item.icon}</span>
-                    <span class="text-[9px] text-amber-600 font-bold mt-0.5">安:${item.safe}</span>
+                    <img src="${item.img}" alt="${item.name}" onerror="this.style.opacity='0.2';">
+                    <span class="text-[9px] text-amber-600 font-bold scale-90">安:${item.safe}</span>
                 `;
                 slot.onclick = () => selectItem(item.id);
                 eGrid.appendChild(slot);
@@ -238,13 +231,12 @@
             refreshBadges();
         }
 
-        // 4. 更新裝備格子上的狀態字樣
+        // 更新背包內裝備的強化與損壞碎裂浮標
         function refreshBadges() {
             Object.keys(itemsState).forEach(id => {
                 const slot = document.getElementById(`slot-${id}`);
                 if (slot) {
                     const item = itemsState[id];
-                    // 清理舊標籤
                     const oldBadge = slot.querySelector('.item-badge');
                     if (oldBadge) oldBadge.remove();
 
@@ -252,14 +244,14 @@
                     badge.className = 'item-badge absolute top-0.5 right-1 text-[10px] font-bold font-mono';
                     
                     if (item.isBroken) {
-                        badge.innerText = '💥';
+                        badge.innerText = '❌';
                     } else if (item.level > 0) {
                         badge.innerText = `+${item.level}`;
                         badge.className += ' text-green-400';
                     }
                     slot.appendChild(badge);
 
-                    // 舞台同步高亮外框
+                    // 選取狀態框框切換
                     if (id === activeItemId) {
                         slot.classList.add('active-item');
                     } else {
@@ -269,15 +261,15 @@
             });
         }
 
-        // 5. 選擇舞台裝備
+        // 點擊切換精煉目標
         function selectItem(id) {
             playSound('click');
             activeItemId = id;
             updateStage();
-            addChatLog(`切換精煉目標 ➔ ${itemsState[id].name}`, '#c0c6d0');
+            addChatLog(`切換目標 ➔ ${itemsState[id].name}`, '#c0c6d0');
         }
 
-        // 6. 選擇功能卷軸
+        // 點擊選取功能卷軸
         function selectScroll(scroll, slotElement) {
             playSound('click');
             document.querySelectorAll('#scrolls-grid .inv-slot').forEach(el => el.classList.remove('selected'));
@@ -288,23 +280,24 @@
             } else {
                 selectedScroll = scroll;
                 slotElement.classList.add('selected');
-                addChatLog(`選取【${scroll.name}】。點擊左側大格子進行施法。`, '#e6bc55');
+                addChatLog(`選取【${scroll.name}】。請點擊左側主舞台格子進行施法。`, '#e6bc55');
             }
         }
 
-        // 7. 點擊大舞台框執行精煉
+        // 觸發大裝備框衝裝
         function enchant() {
             const current = itemsState[activeItemId];
             if (current.isBroken) {
-                addChatLog("❌ 裝備已損壞消失，請點擊重置或更換目標！", "#ff5555");
+                addChatLog("❌ 裝備已損壞消失，請點擊重置按鈕！", "#ff5555");
                 return;
             }
             if (!selectedScroll) {
-                addChatLog("❌ 請先在道具欄上方點選一張卷軸！", "#ff5555");
+                addChatLog("❌ 請先點選一張功能卷軸！", "#ff5555");
                 return;
             }
+            // 卷軸限制判定
             if (selectedScroll.scrollType !== 'support' && selectedScroll.scrollType !== current.type) {
-                addChatLog(`❌ 卷軸不相符！此卷軸無法用於此裝備。`, "#ff5555");
+                addChatLog(`❌ 卷軸與裝備種類不符！無法施法。`, "#ff5555");
                 return;
             }
 
@@ -317,45 +310,45 @@
             }, 250);
         }
 
-        // 8. 正統衝裝防爆、跳階邏輯核心
+        // 核心機率判定演算法
         function executeLogic() {
             const scr = selectedScroll;
             const current = itemsState[activeItemId];
             const lvl = current.level;
             const safe = current.safe;
 
-            // ✨ 保護卷軸機制：附加防爆狀態
+            // 1. 保護卷軸機制
             if (scr.bcast === 'protect') {
                 if (current.isProtected) {
-                    showToast(`物品已處於保護中。`, 'text-gray-400');
-                    addChatLog(`• 提示：${current.name} 已有防爆狀態。`, '#a4aab5');
+                    showToast(`物品已在保護中。`, 'text-gray-400');
+                    addChatLog(`• 提示：${current.name} 已處於防爆保護。`, '#a4aab5');
                 } else {
                     current.isProtected = true;
                     playSound('success');
-                    showToast(`${current.name} 附加防爆保護！`, 'text-amber-400');
-                    addChatLog(`🛡️ 施法成功：${current.name} 已進入【保護中】狀態！`, '#fbbf24');
+                    showToast(`${current.name} 附加防爆狀態！`, 'text-amber-400');
+                    addChatLog(`🛡️ 施法成功：${current.name} 進入【保護中】。`, '#fbbf24');
                 }
                 updateStage();
                 return;
             }
 
-            // ☠️ 詛咒卷軸機制：100% 降 1 階
+            // 2. 詛咒退階機制
             if (scr.bcast === 'curse') {
                 if (lvl > 0) {
                     current.level -= 1;
                     playSound('success');
-                    showToast(`${current.name} 散發出陰暗詛咒...`, 'text-[#ef4444]');
-                    addChatLog(`🩸 詛咒退階：+${lvl} 降回 +${current.level}。`, '#ef4444');
+                    showToast(`${current.name} 受到詛咒退階...`, 'text-[#ef4444]');
+                    addChatLog(`🩸 詛咒退階：+${lvl} ➔ +${current.level}。`, '#ef4444');
                 } else {
                     playSound('click');
                     showToast(`沒有任何事情發生。`, 'text-gray-400');
-                    addChatLog(`• 結果：+0 裝備無法受到更低的詛咒。`, '#a4aab5');
+                    addChatLog(`• 結果：+0 裝備不受詛咒降階影響。`, '#a4aab5');
                 }
                 updateStage();
                 return;
             }
 
-            // ⚔️ 一般衝裝隨機判定（白武防、祝武防）
+            // 3. 一般/祝福 衝裝機率設定
             let successChance = 100;
             if (lvl >= safe) {
                 const over = lvl - safe;
@@ -368,17 +361,15 @@
             const roll = Math.random() * 100;
 
             if (roll < successChance) {
-                // 🟢 強化成功
+                // 🟢 成功升階
                 let plus = 1;
-                
-                // 實裝專屬手機端完美跳階邏輯
                 if (scr.bcast === 'bless') {
                     const r = Math.random();
                     if (current.type === 'weapon') {
-                        // 武器衝裝：祝福武捲+6前最多+2，+6後最多+1
+                        // 武器祝福限制：+6前最多+2，+6後固定+1
                         plus = (lvl < 6) ? ((r < 0.5) ? 1 : 2) : 1;
                     } else {
-                        // 防具衝裝：祝福防捲+3前最多+3，+3後最多+2
+                        // 防具祝福限制：+3前最多+3，+3後最多+2
                         if (lvl < 3) {
                             plus = (r < 0.33) ? 1 : ((r < 0.66) ? 2 : 3);
                         } else {
@@ -390,33 +381,32 @@
                 current.level += plus;
                 playSound('success');
                 showToast(`${current.name} 發出藍色的光芒！`, 'text-[#5599ff]');
-                addChatLog(`✨ 強化成功：+${lvl} ➔ +${current.level} (增加了 +${plus})。`, '#5599ff');
+                addChatLog(`✨ 強化成功：+${lvl} ➔ +${current.level} (增加 +${plus})。`, '#5599ff');
             } else {
                 // 🔴 強化失敗
                 if (current.isProtected) {
-                    current.isProtected = false; // 必定消耗保護
-
+                    current.isProtected = false; // 必消耗保護
                     const rand = Math.random() * 100;
                     if (rand < 75) {
-                        // 75% 降 1 階
+                        // 75% 退一階
                         if (lvl > 0) {
                             current.level -= 1;
                             playSound('success');
                             showToast(`防爆觸發！裝備降階。`, 'text-amber-500');
-                            addChatLog(`🛡️ 防爆成功：裝備完好，但階級退回 +${current.level}，保護效果已消耗。`, '#f59e0b');
+                            addChatLog(`🛡️ 防爆機制：裝備完好，階級退回 +${current.level}，保護效果已消失。`, '#f59e0b');
                         } else {
                             playSound('click');
                             showToast(`防爆觸發！維持 +0。`, 'text-gray-400');
-                            addChatLog(`🛡️ 防爆成功：裝備為 +0 故階級保持，保護效果已消耗。`, '#a4aab5');
+                            addChatLog(`🛡️ 防爆機制：+0裝備維持原樣，保護效果已消失。`, '#a4aab5');
                         }
                     } else {
-                        // 25% 完全維持原階級
+                        // 25% 不動
                         playSound('click');
-                        showToast(`防爆觸發！階級幸運保持不變。`, 'text-gray-300');
-                        addChatLog(`🛡️ 防爆成功：且觸發 25% 幸運概率，階級維持 +${lvl} 不變，保護效果已消耗。`, '#e5e7eb');
+                        showToast(`防爆觸發！階級幸運不變。`, 'text-gray-300');
+                        addChatLog(`🛡️ 防爆機制：觸發 25% 幸運概率，保持 +${lvl}，保護效果已消失。`, '#e5e7eb');
                     }
                 } else {
-                    // 💥 無防爆狀態下爆裝
+                    // 💥 無防爆碎裂消失
                     current.isBroken = true;
                     playSound('fail');
                     showToast(`${current.name} 劇烈地顫抖之後消失了。`, 'text-[#fe3e3e]');
@@ -426,17 +416,16 @@
             updateStage();
         }
 
-        // 9. 刷新大舞台與資料顯示
+        // 刷新大舞台與左側面板顯示
         function updateStage() {
             const current = itemsState[activeItemId];
 
-            const iconSpan = document.getElementById('stage-icon');
+            const stageImg = document.getElementById('stage-img');
             const prefixSpan = document.getElementById('stage-prefix');
             const nameLabel = document.getElementById('stage-name');
             const statusLabel = document.getElementById('stage-status');
             const protectBadge = document.getElementById('protect-badge');
 
-            // 保護標籤控制
             if (current.isProtected && !current.isBroken) {
                 protectBadge.classList.remove('hidden');
             } else {
@@ -444,14 +433,15 @@
             }
 
             if (current.isBroken) {
-                iconSpan.innerText = '💨';
+                stageImg.style.opacity = '0.1';
                 prefixSpan.innerText = '';
                 nameLabel.innerText = `${current.name} (已消失)`;
                 nameLabel.className = "text-base md:text-lg font-bold text-gray-600 line-through";
                 statusLabel.innerText = "這件物品已被摧毀。";
                 statusLabel.className = "text-xs text-red-600 mt-1";
             } else {
-                iconSpan.innerText = current.icon;
+                stageImg.src = current.img;
+                stageImg.style.opacity = '1';
                 prefixSpan.innerText = current.level > 0 ? `+${current.level}` : '';
                 nameLabel.innerText = current.level > 0 ? `+${current.level} ${current.name}` : current.name;
                 nameLabel.className = "text-base md:text-lg font-bold text-[#e6bc55] tracking-wide";
@@ -467,6 +457,7 @@
             refreshBadges();
         }
 
+        // 飄字對話框動畫
         function showToast(text, colorClass) {
             const toast = document.getElementById('result-toast');
             const toastText = document.getElementById('toast-text');
@@ -476,6 +467,7 @@
             setTimeout(() => { toast.style.opacity = '0'; }, 1200);
         }
 
+        // 寫入系統頻道
         function addChatLog(text, colorHex) {
             const chat = document.getElementById('system-chat');
             const p = document.createElement('p');
@@ -485,20 +477,21 @@
             chat.scrollTop = chat.scrollHeight;
         }
 
+        // 全部重置按鈕
         function resetGame() {
             itemsState = {
-                'w1': { id: 'w1', name: '克特之劍', type: 'weapon', level: 0, safe: 6, isBroken: false, isProtected: false, icon: '⚔️' },
-                'a1': { id: 'a1', name: '風龍盔甲', type: 'armor', level: 0, safe: 4, isBroken: false, isProtected: false, icon: '🛡️' },
-                'a2': { id: 'a2', name: '風龍鞋', type: 'armor', level: 0, safe: 6, isBroken: false, isProtected: false, icon: '肩' }
+                'w1': { id: 'w1', name: '瑟魯基之劍', type: 'weapon', level: 0, safe: 6, isBroken: false, isProtected: false, img: './w1.png' },
+                'a1': { id: 'a1', name: '精靈金屬盔甲', type: 'armor', level: 0, safe: 4, isBroken: false, isProtected: false, img: './a1.png' },
+                'a2': { id: 'a2', name: '矮人肩膀防具', type: 'armor', level: 0, safe: 6, isBroken: false, isProtected: false, img: './a2.png' }
             };
             selectedScroll = null;
             activeItemId = 'w1';
-            document.getElementById('system-chat').innerHTML = '<p class="text-gray-500">• 模擬器數據已全部重置。</p>';
-            document.querySelectorAll('#scrolls-grid .inv-slot').forEach(el => el.classList.remove('selected'));
+            document.getElementById('system-chat').innerHTML = '<p class="text-gray-500">• 數據已重新初始化。</p>';
             renderInventory();
             updateStage();
         }
 
+        // 點擊大框框執行衝裝
         document.getElementById('stage-box').onclick = enchant;
 
         // 初始化加載
