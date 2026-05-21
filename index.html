@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lineage - 天堂衝裝模擬器</title>
+    <title>衝裝模擬器</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body {
@@ -78,13 +78,10 @@
                     <h3 id="stage-name" class="text-base md:text-lg font-bold text-[#e6bc55] tracking-wide">瑟魯基之劍</h3>
                     <p id="stage-status" class="text-xs md:text-sm text-green-500 mt-1">這件物品在安定值內，絕對安全。</p>
                 </div>
-                <div id="result-toast" class="absolute inset-0 flex items-center justify-center bg-black/80 rounded-lg opacity-0 pointer-events-none transition-opacity duration-150">
-                    <span id="toast-text" class="text-sm md:text-base font-bold tracking-wider text-center px-4"></span>
-                </div>
             </div>
 
             <div class="bg-[#0b0c10] border border-[#262833] p-3 rounded-lg flex justify-between items-center text-xs gap-3">
-                <span class="text-gray-400 leading-relaxed">💡 操作提醒：先點右側「裝備」切換目標，再選「卷軸」並點擊左側「大裝備框」衝裝！</span>
+                <span class="text-gray-400 leading-relaxed">💡 操作提醒：先選卷軸，再點左側框即可。</span>
                 <button onclick="resetGame()" class="bg-[#2a2c38] hover:bg-[#383b4c] text-gray-200 px-3 py-2 rounded border border-[#44485c] transition shrink-0 font-bold active:scale-95">
                     重置
                 </button>
@@ -93,7 +90,7 @@
             <div class="bg-black border border-[#20222a] p-3 rounded-lg">
                 <div class="text-[11px] font-bold text-[#4c5a70] mb-1">【系統頻道】</div>
                 <div id="system-chat" class="text-xs space-y-1 font-mono h-[100px] md:h-[120px] overflow-y-auto text-gray-400">
-                    <p class="text-gray-500">• 模擬器已就緒 (無動畫版)。</p>
+                    <p class="text-gray-500">• 衝裝動畫已完全移除，即時結算。</p>
                 </div>
             </div>
         </div>
@@ -102,14 +99,11 @@
             <div>
                 <div class="flex justify-between items-center mb-2 px-1">
                     <span class="text-xs font-bold text-gray-400 tracking-wider">INVENTORY (道具欄)</span>
-                    <button class="w-4 h-4 bg-[#23252e] border border-[#3d4152] text-[10px] text-gray-400 flex items-center justify-center font-bold">×</button>
                 </div>
                 <div class="mb-3">
-                    <div class="text-[11px] font-bold text-[#556276] mb-1">【魔法卷軸類】</div>
                     <div class="grid grid-cols-4 sm:grid-cols-7 inv-grid bg-black" id="scrolls-grid"></div>
                 </div>
                 <div>
-                    <div class="text-[11px] font-bold text-[#556276] mb-1">【精煉裝備類】</div>
                     <div class="grid grid-cols-3 inv-grid bg-black" id="equip-grid"></div>
                 </div>
             </div>
@@ -213,6 +207,7 @@
             if (selectedScroll.scrollType !== 'support' && selectedScroll.scrollType !== current.type) {
                 addChatLog(`❌ 種類不符！`, "#ff5555"); return;
             }
+            // 直接執行邏輯，移除所有動畫延遲
             executeLogic();
         }
 
@@ -223,11 +218,11 @@
             const safe = current.safe;
 
             if (scr.bcast === 'protect') {
-                if (current.isProtected) { showToast("已在保護中", "text-gray-400"); }
-                else { current.isProtected = true; playSound('success'); showToast("附加防爆狀態！", "text-amber-400"); }
+                if (current.isProtected) addChatLog("• 已處於保護中。", "#aaa");
+                else { current.isProtected = true; playSound('success'); addChatLog("🛡️ 施加保護。", "#fbbf24"); }
             } else if (scr.bcast === 'curse') {
-                if (lvl > 0) { current.level -= 1; playSound('success'); showToast("詛咒退階", "text-red-500"); }
-                else { playSound('click'); showToast("無事發生", "text-gray-400"); }
+                if (lvl > 0) { current.level -= 1; playSound('success'); addChatLog("🩸 詛咒退階。", "#ef4444"); }
+                else { playSound('click'); addChatLog("• 沒有變化。", "#aaa"); }
             } else {
                 let successChance = (lvl >= safe) ? (lvl - safe === 0 ? 33 : (lvl - safe === 1 ? 25 : 20)) : 100;
                 if (Math.random() * 100 < successChance) {
@@ -238,16 +233,16 @@
                     }
                     current.level += plus;
                     playSound('success');
-                    showToast(`強化成功 +${plus}`, 'text-blue-400');
+                    addChatLog(`✨ 強化成功 +${plus}`, "#5599ff");
                 } else if (current.isProtected) {
                     current.isProtected = false;
                     if (Math.random() < 0.75 && lvl > 0) current.level -= 1;
                     playSound('success');
-                    showToast("防爆觸發", "text-amber-500");
+                    addChatLog("🛡️ 防爆觸發，保護消失。", "#fbbf24");
                 } else {
                     current.isBroken = true;
                     playSound('fail');
-                    showToast("裝備消失", "text-red-600");
+                    addChatLog("💥 裝備已損壞。", "#ef4444");
                 }
             }
             updateStage();
@@ -260,14 +255,6 @@
             document.getElementById('stage-name').innerText = current.isBroken ? "已消失" : (current.level > 0 ? `+${current.level} ` : "") + current.name;
             document.getElementById('protect-badge').classList.toggle('hidden', !current.isProtected);
             document.getElementById('stage-status').innerText = current.isBroken ? "已被摧毀。" : (current.level < current.safe ? "安定值內，絕對安全。" : "⚠️ 已過安定值！");
-        }
-
-        function showToast(text, color) {
-            const toast = document.getElementById('result-toast');
-            const txt = document.getElementById('toast-text');
-            txt.innerText = text; txt.className = `text-base font-bold ${color}`;
-            toast.style.opacity = '1';
-            setTimeout(() => { toast.style.opacity = '0'; }, 800);
         }
 
         function addChatLog(text, color) {
