@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lineage - 天堂衝裝模擬器 (GitHub 圖片校正版)</title>
+    <title>衝裝模擬器</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body {
@@ -91,7 +91,7 @@
                     <span id="stage-prefix" class="absolute top-1 left-1 text-sm font-bold text-green-400"></span>
                 </div>
                 <div class="mt-3 text-center">
-                    <h3 id="stage-name" class="text-base md:text-lg font-bold text-[#e6bc55] tracking-wide">瑟魯基之劍</h3>
+                    <h3 id="stage-name" class="text-base md:text-lg font-bold text-[#e6bc55] tracking-wide">克特之劍</h3>
                     <p id="stage-status" class="text-xs md:text-sm text-green-500 mt-1">這件物品在安定值內，絕對安全。</p>
                 </div>
                 <div id="result-toast" class="absolute inset-0 flex items-center justify-center bg-black/80 rounded-lg opacity-0 pointer-events-none transition-opacity duration-150">
@@ -177,9 +177,9 @@
     <script>
         // 裝備核心資料結構與圖片綁定
         let itemsState = {
-            'w1': { id: 'w1', name: '瑟魯基之劍', type: 'weapon', level: 0, safe: 6, isBroken: false, isProtected: false, img: './w1.png' },
-            'a1': { id: 'a1', name: '精靈金屬盔甲', type: 'armor', level: 0, safe: 4, isBroken: false, isProtected: false, img: './a1.png' },
-            'a2': { id: 'a2', name: '矮人肩膀防具', type: 'armor', level: 0, safe: 6, isBroken: false, isProtected: false, img: './a2.png' }
+            'w1': { id: 'w1', name: '克特之劍', type: 'weapon', level: 0, safe: 6, isBroken: false, isProtected: false, img: './w1.png' },
+            'a1': { id: 'a1', name: '風龍盔甲', type: 'armor', level: 0, safe: 4, isBroken: false, isProtected: false, img: './a1.png' },
+            'a2': { id: 'a2', name: '風龍鞋', type: 'armor', level: 0, safe: 6, isBroken: false, isProtected: false, img: './a2.png' }
         };
 
         let activeItemId = 'w1';
