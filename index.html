@@ -54,6 +54,9 @@
             <div class="inv-grid" id="equip-grid"></div>
         </div>
 
+        <div class="bg-[#121319] border border-[#32353d] p-3 rounded-lg text-[11px] text-gray-400 grid grid-cols-2 gap-x-4 gap-y-1" id="scroll-stats">
+        </div>
+
         <div class="bg-black border border-[#20222a] p-3 rounded-lg text-[12px] h-[80px] overflow-y-auto" id="system-chat">
             <p class="text-gray-500">• 系統已就緒。</p>
         </div>
@@ -66,8 +69,10 @@
             'a2': { id: 'a2', name: '風龍鞋', type: 'armor', level: 0, safe: 6, isBroken: false, isProtected: false, img: './a2.png' }
         };
         let itemsState = JSON.parse(JSON.stringify(initialData));
+        let stats = { w_white:0, a_white:0, w_bless:0, a_bless:0, w_curse:0, a_curse:0, w_protect:0 };
         let activeItemId = 'w1';
         let selectedScroll = null;
+        
         const scrollsData = [
             { id: 'w_white', scrollType: 'weapon', bcast: 'white', label: '白武', img: './w_white.png' },
             { id: 'a_white', scrollType: 'armor',  bcast: 'white', label: '白防', img: './a_white.png' },
@@ -77,6 +82,11 @@
             { id: 'a_curse', scrollType: 'armor',  bcast: 'curse', label: '詛防', img: './a_curse.png' },
             { id: 'w_protect', scrollType: 'support', bcast: 'protect', label: '保護', img: './w_protect.png' }
         ];
+
+        function renderStats() {
+            const container = document.getElementById('scroll-stats');
+            container.innerHTML = scrollsData.map(s => `<span>${s.label}：${stats[s.id]} 張</span>`).join('');
+        }
 
         function renderInventory() {
             const sGrid = document.getElementById('scrolls-grid'); sGrid.innerHTML = '';
@@ -98,6 +108,7 @@
                 eGrid.appendChild(div);
             });
             refreshBadges();
+            renderStats();
         }
 
         function refreshBadges() {
@@ -117,19 +128,31 @@
             const cur = itemsState[activeItemId];
             if (cur.isBroken || !scr || (scr.scrollType !== 'support' && scr.scrollType !== cur.type)) return;
             
+            stats[scr.id]++;
+            
             if (scr.bcast === 'protect') { cur.isProtected = true; addChat("保護開啟"); }
             else if (scr.bcast === 'curse') { if(cur.level > 0) cur.level--; addChat("詛咒 -1"); }
             else {
                 let chance = (cur.level >= cur.safe) ? (cur.level - cur.safe === 0 ? 33 : (cur.level - cur.safe === 1 ? 25 : 20)) : 100;
+                
+                // 強化邏輯
                 if (Math.random() * 100 < chance) {
                     let plus = (scr.bcast === 'bless') ? (cur.type === 'weapon' ? (cur.level < 6 ? (Math.random()<0.5?2:1) : 1) : (cur.level < 3 ? (Math.random()<0.33?3:(Math.random()<0.66?2:1)) : (Math.random()<0.5?2:1))) : 1;
-                    cur.level += plus; addChat("成功 +"+plus);
+                    cur.level += plus; 
+                    addChat("成功 +"+plus);
                 } else if (cur.isProtected) {
                     cur.isProtected = false;
                     if (Math.random() < 0.75 && cur.level > 0) cur.level--;
                     addChat("保護失效，裝備未消失");
                 } else {
-                    cur.isBroken = true; addChat("裝備消失");
+                    cur.isBroken = true; 
+                    addChat("裝備消失");
+                }
+                
+                // 無論結果，若有保護卷則保護狀態消失
+                if (cur.isProtected) {
+                    cur.isProtected = false;
+                    addChat("保護卷消耗完畢");
                 }
             }
             renderInventory(); updateStage();
@@ -143,7 +166,13 @@
             document.getElementById('protect-badge').classList.toggle('hidden', !cur.isProtected);
             document.getElementById('stage-status').innerText = cur.isBroken ? "已被摧毀。" : (cur.level < cur.safe ? "安定值內，絕對安全。" : "⚠️ 已過安定值！");
         }
-        function resetGame() { itemsState = JSON.parse(JSON.stringify(initialData)); renderInventory(); updateStage(); addChat("重置完成"); }
+        function resetGame() { 
+            itemsState = JSON.parse(JSON.stringify(initialData)); 
+            stats = { w_white:0, a_white:0, w_bless:0, a_bless:0, w_curse:0, a_curse:0, w_protect:0 };
+            renderInventory(); 
+            updateStage(); 
+            addChat("重置完成"); 
+        }
         document.getElementById('stage-box').onclick = executeLogic;
         renderInventory(); updateStage();
     </script>
